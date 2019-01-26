@@ -5,8 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLDecoder;
 import jrichardson.snhu.myrecipebox.model.Ingredient;
 import java.util.Scanner;
 
@@ -17,6 +15,7 @@ import java.util.Scanner;
  */
 public class SteppingStoneIngredientTester {
 
+    
     /**
      * @param args the command line arguments
      * @throws IOException
@@ -25,11 +24,16 @@ public class SteppingStoneIngredientTester {
     public static void main(String[] args) throws IOException, 
                                                   InterruptedException {
         
+        final String batFile = "cls.bat";
+        final String tempDir = "C:/StepTestDir";
+        File TempDir = new File(tempDir);
+        File file = new File(TempDir.getPath()+"/"+batFile);
+        
         String answer;
         final String os = System.getProperty("os.name");
         
         //Clear the Screen to begin the session
-        clearScreen(os);
+        clearScreen(os, TempDir, file);
         
         //get a scanner to recieve user input
         Scanner sc = new Scanner(System.in);
@@ -41,10 +45,14 @@ public class SteppingStoneIngredientTester {
         switch (answer) {
             case "Yes":
             case "yes":
+            case "Y":
+            case "y":
                 fillIngredient(sc, os);
                 break;
             case "No":
             case "no":
+            case "N":
+            case "n":
                 System.out.println();
                 System.out.println("Thank you.............. Have a nice day!"
                         + "Good Bye...");
@@ -56,33 +64,35 @@ public class SteppingStoneIngredientTester {
                 break;
         }
         
-        
+        file.delete();
+        TempDir.delete();
+                
     }
     
-    private static void clearScreen(String env) throws IOException, 
+    private static void clearScreen(String env, File dir, File file) throws IOException, 
                                                 InterruptedException{
-        //the clear screen batch file to execute
-        File file = new File("/temp/cls.bat");
-        
         // if the file does not exit on the file system &&
         // we are running on a Windows platform
         if(!file.exists() && env.contains("Windows")){
-            //no, then pull it from the jar file and oush to the file system
+            //no, then pull it from the jar file and push to the file system
             InputStream is = SteppingStoneIngredientTester.class
                                       .getClassLoader()
                                       .getResourceAsStream("resources/cls.bat");
 
             byte[] buf = new byte[20];
             int numread = is.read(buf);
+            is.close();
 
             if(numread > 0){
-                OutputStream os = new FileOutputStream(file);
-                os.write(buf,0,buf.length);
-            }
+                if(!dir.exists()){
+                    dir.mkdir();
+                }
+                    OutputStream os = new FileOutputStream(file);
+                    os.write(buf,0,buf.length);
+                    os.close();
+                }
         }
-        
-        //the file is on the local file system outside the jar
-        
+          
         //Are we running in a windows environment?
         if(env.contains("Windows")){
             //exec the bat file to clear the screen
